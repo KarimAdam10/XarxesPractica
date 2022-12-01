@@ -38,46 +38,41 @@ int main(int argc,char *argv[])
 	char NomFitx[10000], Fitx[10000], error[200];
 	char iprem[16],iploc[16];
 	int portrem, portloc;
-                 
-
-	while(strcmp(iploc,".")!=0 || estat==-3){ //Per sortir el client ha d'introduir un punt d'@IP
-		
-		printf("Entra ip, port i nom del fitxer per la teva peticio: \n");
-		
-		scanf("%s",iploc ); //Usuai entra l'@IP del servidor
-		
-		if(strcmp(iploc,".")!=0){
-			scanf("%d", &portloc ); //Usuai entra el port del servidor
-			if(portloc==0){
-				portloc=3000;
-			}
-			
-			scanf("%s", NomFitx ); //Usuai entra el port del servidor //Entra el nom del fitxer que vol demanar
-			
-			if((scon=UEBc_DemanaConnexio(iploc,portloc,iprem,&portrem,error))==-1){ //Creem i demanem conexió al socket servidor
-				printf("%s \n",error);
-				close(scon);
-				exit(-1);
-			}
-				
-			estat=UEBc_ObteFitxer(scon,NomFitx,Fitx,&long1,error); //Obtenim el fitxer demanat
-			if(estat==0){
-				write(1,Fitx,long1);
-				int file=open(NomFitx, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-				if(write(file,Fitx,long1)==-1){
-					printf("No s'ha pogut guardar el fitxer \n");
-				}
-			}
-			else if(estat==1){
-				printf("%s \n",error);
-			}
-			else if(estat!=-3){
-				printf("%s \n",error);
-			}
-		}
+                
+	printf("Entra ip, port i nom del fitxer per la teva peticio: \n");
+	
+	scanf("%s",iploc ); //Usuai entra l'@IP del servidor
+	
+	scanf("%d", &portloc ); //Usuai entra el port del servidor
+	if(portloc==0){
+		portloc=3000;
 	}
 	
-	/*sleep(20);*/
+	scanf("%s", NomFitx ); //Usuai entra el port del servidor //Entra el nom del fitxer que vol demanar
+	
+	if((scon=UEBc_DemanaConnexio(iploc,portloc,iprem,&portrem,error))==-1){ //Creem i demanem conexió al socket servidor
+		printf("%s \n",error);
+		close(scon);
+		exit(-1);
+	}
+		
+	estat=UEBc_ObteFitxer(scon,NomFitx,Fitx,&long1,error); //Obtenim el fitxer demanat
+	if(estat==0){
+		write(1,Fitx,long1);
+		int file=open(NomFitx+1, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+		if(write(file,Fitx,long1)==-1){
+			printf("No s'ha pogut guardar el fitxer \n");
+		}
+	}
+	else if(estat==1){
+		write(2,Fitx,long1);
+		printf("\n");
+	}
+	else if(estat!=-3){
+		printf("%s \n",error);
+	}
+	
+	sleep(20);
 					
 	if(UEBc_TancaConnexio(scon,error)==-1){ //Tanquem conexió
 		printf("%s \n",error);

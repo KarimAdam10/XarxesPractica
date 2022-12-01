@@ -39,9 +39,13 @@ int main(int argc,char *argv[])
 	char iploc[16],iprem[16];
 	int portloc, portrem;
 	char error[200];
- 	
-	/*int file=fopen(NomFitx,O_RDONLS);*/
-	portloc=8000;
+	FILE *fp;
+	char linia[50];
+	
+	fp=fopen("ser.cfg","r");
+	fgets(linia,sizeof(linia),fp);
+	portloc=atoi(linia+9);
+
 	if(UEBs_IniciaServ(&sesc,portloc,error)==-1){ //Creem i guardem el socket servidor
 		printf("%s \n",error);
 		exit(-1);
@@ -61,8 +65,9 @@ int main(int argc,char *argv[])
 		printf("@socket servidor:\n");  
 		printf("%s %i \n", iploc, portloc); //mostrem @IP i port del client per pantalla
 		
+		estat=10;
 		while(estat!=-3){
-			int estat=UEBs_ServeixPeticio(scon,TipusPeticio,NomFitx,error); //Envia el fitxer demanat al client
+			estat=UEBs_ServeixPeticio(scon,TipusPeticio,NomFitx,error); //Envia el fitxer demanat al client
 			if(estat==0){
 				printf("Obtenir %s \n", NomFitx);
 			}
@@ -74,13 +79,13 @@ int main(int argc,char *argv[])
 			else if(estat==1 || estat==-2 || estat==-4){
 				printf("No hi ha hagut exit en obtenir %s \n", NomFitx);
 			}
-			if(UEBs_TancaConnexio(scon,error)==-1){
-				printf("%s \n",error);
-				exit(-1);
-			}
+		}
+		if(UEBs_TancaConnexio(scon,error)==-1){
+			printf("%s \n",error);
+			exit(-1);
 		}
 	}
-
+	
 	if(UEBs_TancaConnexio(sesc,error)==-1){
 		printf("%s \n",error);
 		exit(-1);

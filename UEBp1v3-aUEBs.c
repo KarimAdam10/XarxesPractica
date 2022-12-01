@@ -58,9 +58,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1);
 int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *MisRes)
 {
 	int estat=0;
-	char iploc[16];
-	strcpy(iploc,"0.0.0.0"); 
-	if((*SckEsc=TCP_CreaSockServidor(iploc,portTCPser))==-1){ 
+	if((*SckEsc=TCP_CreaSockServidor("0.0.0.0",portTCPser))==-1){ 
 		sprintf(MisRes,"Error a TCP_CreaSockServidor(): %s", TCP_ObteMissError());
 		estat=-1;
 	}
@@ -125,15 +123,14 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Mis
 		if(NomFitx[0]!='/'){
 			estat=-4;
 			MisRes="Error en el fitxer de la peticio";
-			estat=ConstiEnvMis(SckCon,"ERR","Error1",6);
+			ConstiEnvMis(SckCon,"ERR","Error1",6);
 		}
 		else{
-			/*strcpy(NomFitx,"primera.html");*/
 			int file=open(NomFitx+1,O_RDONLY);
 			if(file==-1){
 				estat=1;
 				MisRes="El fitxer no existeix";
-				estat=ConstiEnvMis(SckCon,"ERR","Error1",6);
+				ConstiEnvMis(SckCon,"ERR","Error1",6);
 			}
 			else{
 				char buffer[10000];
@@ -141,7 +138,7 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Mis
 				if(bytes_llegits==-1 || bytes_llegits>9999){
 					estat=-4;
 					MisRes="Error en el fitxer de la peticio";
-					estat=ConstiEnvMis(SckCon,"ERR","Error1",6);
+					ConstiEnvMis(SckCon,"ERR","Error1",6);
 				}
 				else{
 					estat=ConstiEnvMis(SckCon,"COR",buffer,bytes_llegits);
@@ -151,11 +148,11 @@ int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *Mis
 		}
 	}
 	if(estat==-1){
-		sprintf(MisRes,"Error a TCP_Rep(): %s", TCP_ObteMissError());
+		sprintf(MisRes,"Error a TCP_Rep() o TCP_Envia(): %s", TCP_ObteMissError());
 	}
 	if(estat==-2){
 		MisRes="Error en el protocol";
-		estat=ConstiEnvMis(SckCon,"ERR","Error1",6);
+		ConstiEnvMis(SckCon,"ERR","Error1",6);
 	}
 	return estat;
 }
@@ -268,7 +265,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 		tipus[3]='\0';
 		longMis[4]='\0';
 		*long1=atoi(longMis);
-		if(sizeof(info1)>9999 || (*long1>0 && *long1<9999) || strcmp(tipus,"OBT")!=0){
+		if(*long1<0 || *long1>9999 || strcmp(tipus,"OBT")!=0){
 			estat=-2;
 		}
 	}

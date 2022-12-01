@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/socket.h> 
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -63,7 +63,7 @@ int UEBc_DemanaConnexio(const char *IPser, int portTCPser, char *IPcli, int *por
 {
 	int scon;
 	strcpy(IPcli,"0.0.0.0"); 
-	*portTCPcli = 3000;	
+	*portTCPcli = 0;	
 	if((scon=TCP_CreaSockClient(IPcli,*portTCPcli))==-1){ //Creem i guardem el socket client
 		sprintf(MisRes,"Error a TCP_CreaSockClient(): %s", TCP_ObteMissError());
 	}
@@ -172,11 +172,11 @@ int UEBc_TancaConnexio(int SckCon, char *MisRes)
 int ConstiEnvMis(int SckCon, const char *tipus, const char *info1, int long1)
 {
 	int estat=0;
-	if(long1>9999 || strcmp(tipus,"OBT")!=0 || sizeof(info1)>9999){
+	if(long1>9999 || strcmp(tipus,"OBT")!=0){
 		estat=-2;
 	}
 	else{
-		char missatge[1006];
+		char missatge[10006];
 		char longInfo[5];
 		sprintf(longInfo,"%.4d",long1);
 		memcpy(missatge,tipus,3);
@@ -226,7 +226,7 @@ int RepiDesconstMis(int SckCon, char *tipus, char *info1, int *long1)
 		tipus[3]='\0';
 		longMis[4]='\0';
 		*long1=atoi(longMis);
-		if(sizeof(info1)>9999 || (*long1>0 && *long1<9999) || (strcmp(tipus,"COR")!=0 && strcmp(tipus,"ERR")!=0)){
+		if( *long1<0 || *long1>9999 || (strcmp(tipus,"COR")!=0 && strcmp(tipus,"ERR")!=0)){
 			estat=-2;
 		}
 	}

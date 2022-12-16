@@ -102,7 +102,7 @@ int UEBc_ObteFitxer(int SckCon, const char *NomFitx, char *Fitx, int *LongFitx, 
 	else if(estat==-2){
 		MisRes="Error en el protocol";
 	}
-	else {
+	else{
 		char tipus[4];
 		estat=RepiDesconstMis(SckCon,tipus,Fitx,LongFitx);
 		if(estat==-1){

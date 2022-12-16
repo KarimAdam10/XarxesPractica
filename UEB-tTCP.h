@@ -27,5 +27,6 @@ int TCP_TancaSock(int Sck);
 int TCP_TrobaAdrSockLoc(int Sck, char *IPloc, int *portTCPloc);
 int TCP_TrobaAdrSockRem(int Sck, char *IPrem, int *portTCPrem);
 char* TCP_ObteMissError(void);
+int TCP_HaArribatAlgunaCosaEnTemps(const int *LlistaSck, int LongLlistaSck, int Temps);
 
 /* int TCP_FuncioExterna(arg1, arg2...);                                  */

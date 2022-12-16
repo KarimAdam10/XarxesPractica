@@ -171,6 +171,9 @@ int TCP_Envia(int Sck, const char *SeqBytes, int LongSeqBytes)
 int TCP_Rep(int Sck, char *SeqBytes, int LongSeqBytes)
 {
 	LongSeqBytes=read(Sck,SeqBytes,LongSeqBytes);
+	if(LongSeqBytes==-1 && errno==104){
+		LongSeqBytes=0;
+	}
 	return LongSeqBytes;
 }
 
@@ -233,6 +236,52 @@ char* TCP_ObteMissError(void)
 {
  return strerror(errno);
 } 
+
+/* Examina simultàniament durant "Temps" (en [ms]) els sockets (poden ser */
+/* TCP, UDP i teclat -stdin-) amb identificadors en la llista “LlistaSck” */
+/* (de longitud “LongLlistaSck” sockets) per saber si hi ha arribat       */
+/* alguna cosa per ser llegida. Si Temps és -1, s'espera indefinidament   */
+/* fins que arribi alguna cosa.                                           */
+/*                                                                        */
+/* "LlistaSck" és un vector d'int d'una longitud d'almenys LongLlistaSck. */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  l'identificador del socket a través del qual ha arribat alguna cosa;  */
+/*  -1 si hi ha error;                                                    */
+/*  -2 si passa "Temps" sense que arribi res.                             */
+int TCP_HaArribatAlgunaCosaEnTemps(const int *LlistaSck, int LongLlistaSck, int Temps)
+{
+	int estat,descmax=0,i=-1;
+	fd_set conjunt; 
+	FD_ZERO(&conjunt);
+	int mida=sizeof(LlistaSck)-1;
+	while(i<mida){
+		i++;
+		if(LlistaSck[i]!=-1) FD_SET(LlistaSck[i],&conjunt);
+		if(LlistaSck[i]>descmax) descmax=LlistaSck[i];
+	}
+	if(Temps==-1){
+		estat=select(descmax+1,&conjunt, NULL, NULL, NULL);
+	}
+	else {
+		struct timeval tv;
+		tv.tv_sec = Temps/1000;
+		tv.tv_usec = Temps*1000;
+		estat=select(descmax+1,&conjunt, NULL, NULL, &tv);
+	}
+	if(estat==0){
+		estat=-2;
+	}
+	else if(estat>0){
+		i=-1;
+		while(i<mida && estat!=LlistaSck[i]){
+			i++;
+			if(FD_ISSET(LlistaSck[i],&conjunt)) estat = LlistaSck[i];
+		}
+	}
+	return estat;
+}
+
 
 /* Si ho creieu convenient, feu altres funcions EXTERNES                  */
 

@@ -11,6 +11,7 @@
 /**************************************************************************/
 
 #include "UEBp1v3-aUEBs.h"
+#include "UEBp2-aDNSc.h"
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,17 +39,22 @@ int main(int argc,char *argv[])
 	char NomFitx[10000], Fitx[10000], error[200];
 	char iprem[16],iploc[16];
 	int portrem, portloc;
-                
-	printf("Entra ip, port i nom del fitxer per la teva peticio: \n");
+	char nomDNS[100], uri[100], esquema[100];
 	
-	scanf("%s",iploc ); //Usuai entra l'@IP del servidor
+	printf("Entra DNS, port i nom del fitxer per la teva peticio: \n");
 	
-	scanf("%d", &portloc ); //Usuai entra el port del servidor
-	if(portloc==0){
+	scanf("%s",uri ); //Usuai entra la uri
+	
+	//Deconstruim la uri en les diferents parts, si el port no hi es utilitzem el predeterminat
+	if(desferURIm1(uri,esquema,nomDNS,&portloc,NomFitx)==3){
 		portloc=3000;
 	}
 	
-	scanf("%s", NomFitx ); //Usuai entra el port del servidor //Entra el nom del fitxer que vol demanar
+	if(DNSc_ResolDNSaIP(nomDNS, iploc, error) == -1){
+		printf("Error a DNSc_ResolDNSaIP(): %s\n", error);
+		exit(-1);
+	}
+		
 	
 	if((scon=UEBc_DemanaConnexio(iploc,portloc,iprem,&portrem,error))==-1){ //Creem i demanem conexió al socket servidor
 		printf("%s \n",error);
@@ -86,8 +92,56 @@ int main(int argc,char *argv[])
 /* servir només en aquest mateix fitxer. Les seves declaracions es troben */
 /* a l'inici d'aquest fitxer.                                             */
 
-/* Descripció de la funció, dels arguments, valors de retorn, etc.        */
-/*int FuncioInterna(arg1, arg2...)
+
+/* Desfà l'URI "uri" en les seves parts: l'esquema (protocol) "esq", el   */
+/* nom DNS (o l'@IP), el "nom_host", el número de port "port" i el nom    */
+/* del fitxer "nom_fitxer".                                               */
+/*                                                                        */
+/* L'URI ha de tenir la forma "esq://nom_host:port/nom_fitxer" o bé       */
+/* sense el número de port "esq://nom_host/nom_fitxer", i llavors port    */
+/* s'emplena amb el valor 0 (la resta de casos no es contemplen).         */
+/*                                                                        */
+/* "uri", "esq", "nom_host" i "nom_fitxer" són "strings" de C (vector de  */
+/* chars imprimibles acabat en '\0') d'una longitud suficient.            */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  el nombre de parts de l'URI que s'han assignat (4 si l'URI tenia      */
+/*  número de port o 3 si no en tenia.                                    */
+int desferURIm1(const char *uri, char *esq, char *nom_host, int *port, char *nom_fitx)
 {
-	
-} */
+ int nassignats;
+ char port_str[100];
+ 
+ strcpy(esq,"");
+ strcpy(nom_host,"");
+ *port = 0;
+ strcpy(nom_fitx,"");
+
+ nassignats = sscanf(uri,"%[^:]://%[^:]:%[^/]%s",esq,nom_host,port_str,nom_fitx);
+ 
+ /*
+ printf("nassignats %d\n",nassignats);
+ printf("esq %s\n", esq);
+ printf("nom_host %s\n", nom_host);
+ printf("port_str %s\n", port_str);
+ printf("nom_fitx %s\n", nom_fitx);
+ */
+ 
+ /* URIs amb #port, p.e., esq://host:port/fitx, 4 valors assignats */
+ if(nassignats==4)
+ {
+  *port = atoi(port_str);
+  return nassignats;
+ }  
+  
+ /* URIs sense #port, p.e., esq://host/fitx, 2 valors assignats,  */
+ /* i llavors es fa port = 0.                                     */
+ if(nassignats==2)
+ {
+  *port = 0;
+   nassignats = sscanf(uri,"%[^:]://%[^/]%s",esq,nom_host,nom_fitx);
+   return nassignats;
+ }
+
+ return nassignats;
+}

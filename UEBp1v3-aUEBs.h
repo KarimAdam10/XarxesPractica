@@ -20,4 +20,6 @@ int UEBs_IniciaServ(int *SckEsc, int portTCPser, char *MisRes);
 int UEBs_AcceptaConnexio(int SckEsc, char *IPser, int *portTCPser, char *IPcli, int *portTCPcli, char *MisRes);
 int UEBs_ServeixPeticio(int SckCon, char *TipusPeticio, char *NomFitx, char *MisRes);
 int UEBs_TancaConnexio(int SckCon, char *MisRes);
+int UEBs_HaArribatAlgunaCosa(const int *LlistaSck, int LongLlistaSck, char *TextRes);
+
 /* int UEBs_FuncioExterna(arg1, arg2...);                                 */

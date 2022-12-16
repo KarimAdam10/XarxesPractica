@@ -176,6 +176,30 @@ int UEBs_TancaConnexio(int SckCon, char *MisRes)
 	return estat;
 }
 
+/* Examina simultàniament i sense límit de temps (una espera indefinida)  */
+/* els sockets (poden ser TCP, UDP i  teclat -stdin-) amb identificadors  */
+/* en la llista “LlistaSck” (de longitud “LongLlistaSck” sockets) per     */
+/* saber si hi ha arribat alguna cosa per ser llegida, excepte aquells    */
+/* que tinguin identificadors igual a -1.                                 */
+/* Escriu un text que descriu el resultat de la funció a "TextRes".       */
+/*                                                                        */
+/* "LlistaSck" és un vector d'int d'una longitud d'almenys LongLlistaSck. */
+/* "TextRes" és un "string" de C (vector de chars imprimibles acabat en   */
+/* '\0') d'una longitud màxima de 200 chars (incloent '\0').              */
+/*                                                                        */
+/* Retorna:                                                               */
+/*  l'identificador del socket a través del qual ha arribat alguna cosa;  */
+/*  -1 si hi ha error.                                                    */
+int UEBs_HaArribatAlgunaCosa(const int *LlistaSck, int LongLlistaSck, char *TextRes)
+{
+	int estat;
+	if((estat=TCP_HaArribatAlgunaCosaEnTemps(LlistaSck,LongLlistaSck,-1))==-1)
+	{
+	    sprintf(TextRes,"Error a TCP_HaArribatAlgunaCosaEnTemps(): %s", TCP_ObteMissError());
+	}
+	return estat;
+}
+
 /* Si ho creieu convenient, feu altres funcions EXTERNES                  */
 
 /* Descripció de la funció, dels arguments, valors de retorn, etc.        */
